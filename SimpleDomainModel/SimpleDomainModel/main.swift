@@ -61,7 +61,7 @@ public struct Money {
 public class Job {
     
     public var title: String
-    public var salary: JobType
+    public var type: JobType
     
     public enum JobType {
         case Hourly(Double)
@@ -70,19 +70,20 @@ public class Job {
   
   public init(title : String, type : JobType) {
     self.title = title
-    self.salary = type
+    self.type = type
   }
   
     public func calculateIncome(hours: Int) -> Int {
-        switch salary {
-        case .Hourly:
-            let numner = salary.Hourly.rawValue
-            return Int(salary.Hourly())*hours
-        case .Salary: return salary
+        switch type {
+        case .Hourly(let value):
+            return hours * Int(value)
+        case .Salary(let value):
+            return value
         }
     }
   
   public func raise(amt : Double) {
+    self.type = 
   }
 }
 
@@ -99,8 +100,8 @@ public class Person {
         return self.job
     }
     set(value) {
-        if age < 16 {
-            self.job = Job(title: (value?.title)!, type: (value?.salary)!)
+        if age > 16 {
+            self.job = Job(title: (value?.title)!, type: (value?.type)!)
         }else{
             self.job = nil
         }
@@ -108,9 +109,11 @@ public class Person {
   }
   
   public var spouse : Person? {
-    get { }
+    get {
+        return self.spouse
+    }
     set(value) {
-        if age < 18 {
+        if age > 18 {
             self.spouse = Person(firstName: (value?.firstName)!, lastName: (value?.lastName)!, age: (value?.age)!)
         }else{
             // isn't the default nil anyway?
@@ -159,8 +162,8 @@ public class Family {
   public func householdIncome() -> Int {
     var total = 0
     for person in members {
-        if ((person.job?.salary) != nil) {
-            total += person.job?.salary
+        if ((person.job?.type) != nil) {
+            total += person.job?.calculateIncome(person.job!.type)
         }
     }
   }
