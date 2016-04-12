@@ -28,15 +28,17 @@ public struct Money {
   public var currency : String
   
   public func convert(to: String) -> Money {
-    let check = (currency, to)
-    switch check {
-    case ("USD", "GBP"): return Money(amount: amount/2, currency: "GBP")
-    case ("GBP", "USD"): return Money(amount: amount*2, currency: "USD")
-    case ("USD", "EUR"): return Money(amount: amount*15/10, currency: "EUR")
-    default: return Money(amount: amount, currency: currency)
-    }
+    let ratio = [
+        "USD": 1,
+        "GBP": 0.5,
+        "EUR": 1.5,
+        "CAN": 1.25
+    ]
+    let rate = ratio[to]! / ratio[currency]!
+    let another = Int(Double(self.amount) * rate)
+    return Money(amount: another, currency: to)
   }
-  
+
   public func add(to: Money) -> Money {
     if to.currency == currency {
         return Money(amount: amount+to.amount, currency: currency)
@@ -83,7 +85,7 @@ public class Job {
     }
   
   public func raise(amt : Double) {
-    self.type = 
+    self.type = (10 * amt)
   }
 }
 
@@ -100,7 +102,7 @@ public class Person {
         return self.job
     }
     set(value) {
-        if age > 16 {
+        if age >= 16 {
             self.job = Job(title: (value?.title)!, type: (value?.type)!)
         }else{
             self.job = nil
@@ -113,7 +115,7 @@ public class Person {
         return self.spouse
     }
     set(value) {
-        if age > 18 {
+        if age >= 18 {
             self.spouse = Person(firstName: (value?.firstName)!, lastName: (value?.lastName)!, age: (value?.age)!)
         }else{
             // isn't the default nil anyway?
@@ -156,14 +158,20 @@ public class Family {
         }
         if check {
             members += [child]
+            return true
+        }else{
+            return false
         }
+        
     }
   
   public func householdIncome() -> Int {
-    var total = 0
+    var total = 0.0
+    
     for person in members {
         if ((person.job?.type) != nil) {
-            total += person.job?.calculateIncome(person.job!.type)
+            let value = person.job?.type
+            total = total + Double(value)
         }
     }
   }
