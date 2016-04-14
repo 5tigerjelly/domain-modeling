@@ -32,7 +32,7 @@ public struct Money {
         "USD": 1,
         "GBP": 0.5,
         "EUR": 1.5,
-        "CAN": 1.25
+        "CAN": 1.25,
     ]
     let rate = ratio[to]! / ratio[currency]!
     let another = Int(Double(self.amount) * rate)
@@ -43,8 +43,8 @@ public struct Money {
     if to.currency == currency {
         return Money(amount: amount+to.amount, currency: currency)
     }else{
-        let newmoney = self.convert(to.currency)
-        return Money(amount: newmoney.amount+to.amount, currency: currency)
+        let newmoney = convert(to.currency)
+        return Money(amount: newmoney.amount+to.amount, currency: to.currency)
     }
   }
   public func subtract(from: Money) -> Money {
@@ -78,14 +78,19 @@ public class Job {
     public func calculateIncome(hours: Int) -> Int {
         switch type {
         case .Hourly(let value):
-            return hours * Int(value)
+            return Int(Double(hours) * value)
         case .Salary(let value):
             return value
         }
     }
   
   public func raise(amt : Double) {
-    self.type = (10 * amt)
+    switch type {
+    case .Hourly(let value):
+        self.type = .Hourly(Double(value + amt))
+    case .Salary(let value):
+        self.type = .Salary(value + Int(amt))
+    }
   }
 }
 
@@ -96,30 +101,27 @@ public class Person {
   public var firstName : String = ""
   public var lastName : String = ""
   public var age : Int = 0
-
+  public var job2 : Job? = nil
+    public var spouse2 : Person? = nil;
+    
   public var job : Job? {
     get {
-        return self.job
+        return job2
     }
     set(value) {
         if age >= 16 {
-            self.job = Job(title: (value?.title)!, type: (value?.type)!)
-        }else{
-            self.job = nil
+            job2 = value
         }
     }
   }
   
   public var spouse : Person? {
     get {
-        return self.spouse
+        return spouse2
     }
     set(value) {
         if age >= 18 {
-            self.spouse = Person(firstName: (value?.firstName)!, lastName: (value?.lastName)!, age: (value?.age)!)
-        }else{
-            // isn't the default nil anyway?
-            self.spouse = nil
+            spouse2 = value
         }
     }
   }
@@ -159,23 +161,31 @@ public class Family {
         if check {
             members += [child]
             return true
-        }else{
+        } else {
             return false
         }
-        
     }
   
   public func householdIncome() -> Int {
-    var total = 0.0
+    var total = 0
     
     for person in members {
-        if ((person.job?.type) != nil) {
-            let value = person.job?.type
-            total = total + Double(value)
+//        if ((person.job?.type) != nil){
+//            switch person.job!.type {
+//            case .Hourly (let value):
+//                total += Int(value * 2000)
+//            case .Salary(let value):
+//                total += value
+//            }
+//        }
+        if ((person.job?.type) != nil){
+            total += person.job!.calculateIncome(2000)
         }
     }
+    return total
   }
 }
+
 
 
 
